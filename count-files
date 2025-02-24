@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# Function to count files based on flags and display a descriptive message
+count_files() {
+    local DIR=$1
+    local RECURSIVE=$2
+    shift 2
+    local FLAGS=("$@")
+    local COUNT
+    local OUTPUT=""
+
+    for FLAG in "${FLAGS[@]}"; do
+        if [[ $RECURSIVE == "-r" ]]; then
+            case "$FLAG" in
+                -mp3)
+                    COUNT=$(find "$DIR" -type f -name "*.mp3" | wc -l)
+                    OUTPUT+="$COUNT mp3 files | "
+                    ;;
+                -audio|-a)
+                    COUNT=$(find "$DIR" -type f \( -name "*.mp3" -o -name "*.wav" -o -name "*.flac" -o -name "*.aac" -o -name "*.ogg" -o -name "*.m4a" \) | wc -l)
+                    OUTPUT+="$COUNT audio files | "
+                    ;;
+                -mp4)
+                    COUNT=$(find "$DIR" -type f -name "*.mp4" | wc -l)
+                    OUTPUT+="$COUNT mp4 files | "
+                    ;;
+                -video|-v)
+                    COUNT=$(find "$DIR" -type f \( -name "*.mp4" -o -name "*.avi" -o -name "*.mkv" -o -name "*.mov" -o -name "*.flv" -o -name "*.wmv" -o -name "*.webm" \) | wc -l)
+                    OUTPUT+="$COUNT video files | "
+                    ;;
+                -txt|-text)
+                    COUNT=$(find "$DIR" -type f -name "*.txt" | wc -l)
+                    OUTPUT+="$COUNT text files | "
+                    ;;
+                -d|-documents)
+                    COUNT=$(find "$DIR" -type f \( -name "*.txt" -o -name "*.pdf" -o -name "*.csv" -o -name "*.xls" -o -name "*.rtf" -o -name "*.doc" -o -name "*.html" -o -name "*.odt" -o -name "*.ppt" -o -name "*.pptx" -o -name "*.xlsx" \) | wc -l)
+                    OUTPUT+="$COUNT document files | "
+                    ;;
+                -x|-executable)
+                    COUNT=$(find "$DIR" -type f -executable | wc -l)
+                    OUTPUT+="$COUNT executable files | "
+                    ;;
+                -p|-pictures|-image)
+                    COUNT=$(find "$DIR" -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.svg" -o -name "*.eps" \) | wc -l)
+                    OUTPUT+="$COUNT image files | "
+                    ;;
+                -t|-total)
+                    COUNT=$(find "$DIR" -type f | wc -l)
+                    OUTPUT+="$COUNT total files | "
+                    ;;
+                *)
+                    echo "Invalid option: $FLAG"
+                    exit 1
+                    ;;
+            esac
+        else
+            case "$FLAG" in
+                -mp3)
+                    COUNT=$(find "$DIR" -maxdepth 1 -type f -name "*.mp3" | wc -l)
+                    OUTPUT+="$COUNT mp3 files | "
+                    ;;
+                -audio|-a)
+                    COUNT=$(find "$DIR" -maxdepth 1 -type f \( -name "*.mp3" -o -name "*.wav" -o -name "*.flac" -o -name "*.aac" -o -name "*.ogg" -o -name "*.m4a" \) | wc -l)
+                    OUTPUT+="$COUNT audio files | "
+                    ;;
+                -mp4)
+                    COUNT=$(find "$DIR" -maxdepth 1 -type f -name "*.mp4" | wc -l)
+                    OUTPUT+="$COUNT mp4 files | "
+                    ;;
+                -video|-v)
+                    COUNT=$(find "$DIR" -maxdepth 1 -type f \( -name "*.mp4" -o -name "*.avi" -o -name "*.mkv" -o -name "*.mov" -o -name "*.flv" -o -name "*.wmv" -o -name "*.webm" \) | wc -l)
+                    OUTPUT+="$COUNT video files | "
+                    ;;
+                -txt|-text)
+                    COUNT=$(find "$DIR" -maxdepth 1 -type f -name "*.txt" | wc -l)
+                    OUTPUT+="$COUNT text files | "
+                    ;;
+                -d|-documents)
+                    COUNT=$(find "$DIR" -maxdepth 1 -type f \( -name "*.txt" -o -name "*.pdf" -o -name "*.csv" -o -name "*.xls" -o -name "*.rtf" -o -name "*.doc" -o -name "*.html" -o -name "*.odt" -o -name "*.ppt" -o -name "*.pptx" -o -name "*.xlsx" \) | wc -l)
+                    OUTPUT+="$COUNT document files | "
+                    ;;
+                -x|-executable)
+                    COUNT=$(find "$DIR" -maxdepth 1 -type f -executable | wc -l)
+                    OUTPUT+="$COUNT executable files | "
+                    ;;
+                -p|-pictures|-image)
+                    COUNT=$(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.svg" -o -name "*.eps" \) | wc -l)
+                    OUTPUT+="$COUNT image files | "
+                    ;;
+                -t|-total)
+                    COUNT=$(find "$DIR" -maxdepth 1 -type f | wc -l)
+                    OUTPUT+="$COUNT total files | "
+                    ;;
+                *)
+                    echo "Invalid option: $FLAG"
+                    exit 1
+                    ;;
+            esac
+        fi
+    done
+
+    # Remove trailing separator and print the output
+    OUTPUT=${OUTPUT% | }
+    echo "$OUTPUT"
+}
+
+# Main script logic
+if [[ $# -lt 1 ]]; then
+    echo "Usage: count-files [-r] [-mp3] [-audio|-a] [-mp4] [-video|-v] [-txt|-text] [-d|-documents] [-x|-executable] [-p|-pictures|-image] [-t|-total] DIRECTORY"
+    exit 1
+fi
+
+RECURSIVE=""
+DIR=""
+FLAGS=()
+
+while [[ "$1" =~ ^- ]]; do
+    case "$1" in
+        -r) RECURSIVE="-r";;
+        -mp3|-audio|-a|-mp4|-video|-v|-txt|-text|-d|-documents|-x|-executable|-p|-pictures|-image|-t|-total) FLAGS+=("$1");;
+        *) echo "Invalid option: $1" && exit 1;;
+    esac
+    shift
+done
+
+DIR=$1
+
+if [[ -z $DIR ]]; then
+    echo "Usage: count-files [-r] [-mp3] [-audio|-a] [-mp4] [-video|-v] [-txt|-text] [-d|-documents] [-x|-executable] [-p|-pictures|-image] [-t|-total] DIRECTORY"
+    exit 1
+fi
+
+count_files "$DIR" "$RECURSIVE" "${FLAGS[@]}"
