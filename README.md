@@ -12,13 +12,15 @@ Find, count, and/or remove files based on file type.
 count-files [options] [directory]
 
 Example:
-count-files -r -t -v -a /foo will recursively (-r) count and display the total file count (-t) of foo, total count of video files (-v), and total count of audio files (-a)
+recursively (-r) count and display the total file count (-t) of foo, total count of video files (-v), and total count of audio files (-a)
+bash
+'count-files -r -t -v -a /foo'
 
--delete or -remove flags can be used to remove specified file types
-Example:
-'count-files -a -remove /foo' will find, count, and remove all audio files in /foo 
+Find, count, and remove all audio files in directory with -delete or -remove
+bash
+'count-files -a -remove /foo'
 
-Options
+All Options / Flags
 -r : Recursively process files in the directory and its subdirectories.
 -mp3 : Count .mp3 files.
 -audio, -a : Count audio files (.mp3, .wav, .flac, .aac, .ogg, .m4a).
@@ -31,6 +33,7 @@ Options
 -t, -total : Count all files.
 -remove : Remove files of the specified type(s).
 -delete : Alias for -remove, also removes files of the specified type(s).
+
 Examples
 Count all files in a directory
 bash
