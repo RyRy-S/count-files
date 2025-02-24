@@ -4,7 +4,8 @@
 count_files() {
     local DIR=$1
     local RECURSIVE=$2
-    shift 2
+    local REMOVE=$3
+    shift 3
     local FLAGS=("$@")
     local COUNT
     local OUTPUT=""
@@ -40,9 +41,12 @@ count_files() {
                     COUNT=$(find "$DIR" -type f -executable | wc -l)
                     OUTPUT+="$COUNT executable files | "
                     ;;
-                -p|-pictures|-image)
+                -p|-pictures|-image|-i)
                     COUNT=$(find "$DIR" -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.svg" -o -name "*.eps" \) | wc -l)
                     OUTPUT+="$COUNT image files | "
+                    if [[ "$REMOVE" == "-remove" || "$REMOVE" == "-delete" ]]; then
+                        find "$DIR" -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.svg" -o -name "*.eps" \) -exec echo "Removing {}" \; -exec rm {} \;
+                    fi
                     ;;
                 -t|-total)
                     COUNT=$(find "$DIR" -type f | wc -l)
@@ -83,9 +87,12 @@ count_files() {
                     COUNT=$(find "$DIR" -maxdepth 1 -type f -executable | wc -l)
                     OUTPUT+="$COUNT executable files | "
                     ;;
-                -p|-pictures|-image)
+                -p|-pictures|-image|-i)
                     COUNT=$(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.svg" -o -name "*.eps" \) | wc -l)
                     OUTPUT+="$COUNT image files | "
+                    if [[ "$REMOVE" == "-remove" || "$REMOVE" == "-delete" ]]; then
+                        find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.svg" -o -name "*.eps" \) -exec echo "Removing {}" \; -exec rm {} \;
+                    fi
                     ;;
                 -t|-total)
                     COUNT=$(find "$DIR" -maxdepth 1 -type f | wc -l)
@@ -106,18 +113,20 @@ count_files() {
 
 # Main script logic
 if [[ $# -lt 1 ]]; then
-    echo "Usage: count-files [-r] [-mp3] [-audio|-a] [-mp4] [-video|-v] [-txt|-text] [-d|-documents] [-x|-executable] [-p|-pictures|-image] [-t|-total] DIRECTORY"
+    echo "Usage: count-files [-r] [-mp3] [-audio|-a] [-mp4] [-video|-v] [-txt|-text] [-d|-documents] [-x|-executable] [-p|-pictures|-image|-i] [-t|-total] [-remove] [-delete] DIRECTORY"
     exit 1
 fi
 
 RECURSIVE=""
+REMOVE=""
 DIR=""
 FLAGS=()
 
 while [[ "$1" =~ ^- ]]; do
     case "$1" in
         -r) RECURSIVE="-r";;
-        -mp3|-audio|-a|-mp4|-video|-v|-txt|-text|-d|-documents|-x|-executable|-p|-pictures|-image|-t|-total) FLAGS+=("$1");;
+        -remove|-delete) REMOVE="$1";;
+        -mp3|-audio|-a|-mp4|-video|-v|-txt|-text|-d|-documents|-x|-executable|-p|-pictures|-image|-i|-t|-total) FLAGS+=("$1");;
         *) echo "Invalid option: $1" && exit 1;;
     esac
     shift
@@ -126,8 +135,8 @@ done
 DIR=$1
 
 if [[ -z $DIR ]]; then
-    echo "Usage: count-files [-r] [-mp3] [-audio|-a] [-mp4] [-video|-v] [-txt|-text] [-d|-documents] [-x|-executable] [-p|-pictures|-image] [-t|-total] DIRECTORY"
+    echo "Usage: count-files [-r] [-mp3] [-audio|-a] [-mp4] [-video|-v] [-txt|-text] [-d|-documents] [-x|-executable] [-p|-pictures|-image|-i] [-t|-total] [-remove] [-delete] DIRECTORY"
     exit 1
 fi
 
-count_files "$DIR" "$RECURSIVE" "${FLAGS[@]}"
+count_files "$DIR" "$RECURSIVE" "$REMOVE" "${FLAGS[@]}"
